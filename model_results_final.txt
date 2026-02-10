@@ -1,0 +1,10 @@
+Final Refined Accuracy: 85.85%
+              precision    recall  f1-score   support
+
+        High       0.79      0.89      0.84        35
+         Low       0.87      0.94      0.91        36
+      Medium       0.93      0.74      0.83        35
+
+    accuracy                           0.86       106
+   macro avg       0.87      0.86      0.86       106
+weighted avg       0.87      0.86      0.86       106

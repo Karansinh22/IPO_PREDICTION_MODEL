@@ -1,0 +1,51 @@
+=======================================================
+  FINAL MODEL EVALUATION REPORT
+=======================================================
+
+Best Config: #1
+Params: {'n_estimators': 300, 'learning_rate': 0.1, 'max_depth': 7, 'subsample': 0.9, 'colsample_bytree': 0.8, 'reg_alpha': 0.1, 'reg_lambda': 1.0, 'min_child_weight': 1, 'gamma': 0}
+
+All config accuracies:
+  Config 0: 0.8167 (81.7%)
+  Config 1: 0.8500 (85.0%)
+  Config 2: 0.8389 (83.9%)
+  Config 3: 0.8333 (83.3%)
+
+=======================================================
+  CLASSIFICATION METRICS (XGBoost + SMOTETomek)
+=======================================================
+  Accuracy:  0.8500 (85.0%)
+  Precision: 0.8593 (85.9%)
+  Recall:    0.8500 (85.0%)
+  F1 Score:  0.8507 (85.1%)
+
+              precision    recall  f1-score   support
+
+        High       0.89      0.78      0.83        60
+         Low       0.93      0.85      0.89        60
+      Medium       0.76      0.92      0.83        60
+
+    accuracy                           0.85       180
+   macro avg       0.86      0.85      0.85       180
+weighted avg       0.86      0.85      0.85       180
+
+  5-Fold CV Accuracy: 0.8374 (+/- 0.0647)
+
+=======================================================
+  REGRESSION METRICS (Random Forest)
+=======================================================
+  R2 Score: 0.5878 (58.8%)
+
+=======================================================
+  TOP 10 FEATURE IMPORTANCE
+=======================================================
+  High_Sub                       0.2274
+  Subscription_Strength          0.1865
+  Total_Sq                       0.1054
+  Total                          0.1040
+  QIB_Sq                         0.0316
+  HNI_x_RII                      0.0234
+  HNI                            0.0224
+  HNI_Sq                         0.0220
+  QIB_x_HNI                      0.0215
+  QIB_x_RII                      0.0207
