@@ -44,20 +44,32 @@ The final model is a **Voting Ensemble** of multiple tuned **XGBoost** classifie
 
 ---
 
-## 🛠️ Technical Stack
-- **Backend**: Python, Flask
-- **Machine Learning**: Scikit-Learn, XGBoost, Imbalanced-Learn
-- **Frontend**: HTML5, CSS3 (Glassmorphism UI)
-- **Serialization**: Joblib
+## 🛠️ Technical Stack & Features
+
+### **The "Wealth Predictor" Overhaul**
+The application has been upgraded into a professional-grade **Money Theme** terminal with:
+- **Visual Identity**: High-end financial aesthetic using **Green, Beige, and Black**.
+- **Rupee Integration**: Extensive use of the **₹** symbol for localization.
+- **Dynamic Marketplace Dashboard**: 
+  - **Yearly Success Trend**: Line chart tracking IPO performance over 15 years.
+  - **Market Benchmark**: Real-time comparison bar chart between selected IPO and market averages.
+  - **Subscription Analytics**: Scatter plots showing correlations between hype and gain.
+
+### **Core Technologies**
+- **Backend**: Python, Flask (with session-based authentication)
+- **Machine Learning**: Scikit-Learn, XGBoost, SMOTETomek
+- **Data Visualization**: Chart.js (Interactive & Responsive)
+- **Frontend**: Glassmorphism UI with Vanilla CSS
+- **Dataset**: 560+ Historical Indian IPOs from 2010 onwards
 
 ---
 
-## 🛤️ Roadmap to 90% Accuracy
-To push the performance from the current 86% to 90%, the following steps are planned:
-1. **Sentiment Integration**: Scrape and analyze real-time market sentiment from financial news and Twitter/X APIs.
-2. **Economic Indicators**: Incorporate macro-economic data (interest rates, GDP growth, market volatility/VIX).
-3. **Advanced Stacking**: Implement a meta-learner (e.g., Logistic Regression or LightGBM) to intelligently weigh predictions from multiple base models.
-4. **Time-Series Analysis**: Train on larger historical datasets to identify cyclical market trends (Bull/Bear cycle detection).
+## 🛤️ Roadmap & Achievements
+- [x] **85.85% Accuracy** achieved via XGBoost Ensemble.
+- [x] **SMOTETomek** integration for handling class imbalance.
+- [x] **Market-Wide Search**: Instant auto-fill for 561 Indian IPOs.
+- [x] **Persistent Sessions**: User history and state tracking.
+- [x] **Interactive Dashboard**: Selection-aware visualizations.
 
 ---
 
