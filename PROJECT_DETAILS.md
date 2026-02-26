@@ -89,9 +89,16 @@ To break the 70% barrier, we engineered 12+ interaction features:
 
 ### **Final Project Statistics**
 - **Accuracy**: 85.85%
-- **Dataset Size**: 561 Historical Records (2010–2025)
-- **Features**: 15 Optimized Parameters
-- **UI State**: Fully dynamic, responsive financial terminal.
+## 🎭 Phase 5: GMP-Based Sentiment Model
+### **1. Integration of Market Sentiment**
+- Developed a parallel model using **Grey Market Premium (GMP)** and Subscription data.
+- **Accuracy**: **66.67%** (Reflecting the volatility of grey market data).
+- **Architecture**: XGBoost Ensemble with SMOTETomek balancing.
+
+### **2. Dual-Engine Web Application**
+- Overhauled `app.py` and `index.html` to support a **Mode Switcher**.
+- **Fundamental Mode**: Best for long-term valuation-based analysis.
+- **GMP Mode**: Best for immediate market sentiment and "hype" analysis.
 
 ---
 
@@ -99,3 +106,11 @@ To break the 70% barrier, we engineered 12+ interaction features:
 1. **Model Stacking**: Replace the Voting Classifier with a Stacking approach using a Logistic Regression meta-learner.
 2. **Sentiment Analysis**: Integrate live news headlines and social media sentiment (X/Twitter) to capture "Market Hype."
 3. **Macro-Data**: Include NSE/BSE VIX (Volatility Index) and sector-wise performance prior to IPO listing.
+
+---
+
+### **Project Statistics at a Glance**
+- **Total Models**: 2 (Fundamental & GMP)
+- **Total ML Tooling**: XGBoost, SMOTETomek, RobustScaler, Voting Ensemble.
+- **Top Accuracy**: 85.85% (Fundamental)
+- **Current State**: Stable, Professional, and Production-Ready.

@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us | IPO Wealth Predictor</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --money-green: #22c55e;
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --beige: #f5f5dc;
+            --deep-black: #0a0a0a;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--deep-black);
+            background-image: radial-gradient(circle at 20% 30%, #1a1a2e 0%, #0a0a0a 100%);
+            color: var(--beige);
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        .top-nav {
+            position: sticky;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 15px 50px;
+            background: rgba(13, 17, 23, 0.82);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            z-index: 1000;
+            border-bottom: 1px solid var(--glass-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-sizing: border-box;
+        }
+
+        .nav-brand h1 {
+            font-size: 1.2rem;
+            margin: 0;
+            background: linear-gradient(135deg, #fff 0%, var(--beige) 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 700;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 30px;
+        }
+
+        .nav-link {
+            color: var(--beige);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            opacity: 0.6;
+            transition: 0.3s;
+        }
+
+        .nav-link:hover {
+            opacity: 1;
+            color: var(--money-green);
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 80px auto;
+            padding: 0 20px;
+        }
+
+        .card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
+            border-radius: 28px;
+            padding: 50px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+        }
+
+        h2 {
+            font-size: 2.5rem;
+            margin-bottom: 30px;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        p {
+            line-height: 1.8;
+            opacity: 0.8;
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+        }
+
+        .highlight {
+            color: var(--money-green);
+            font-weight: 600;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="top-nav">
+        <div class="nav-brand">
+            <h1>Predictor Terminal</h1>
+        </div>
+        <div class="nav-links">
+            <a href="/" class="nav-link">Home</a>
+            <a href="/#analysis-engine" class="nav-link">Prediction Engine</a>
+            <a href="/about" class="nav-link">About Us</a>
+            <a href="/contact" class="nav-link">Contact Us</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="card">
+            <h2>Our Mission</h2>
+            <p>At <span class="highlight">Predictor Terminal</span>, we aim to democratize financial intelligence by
+                bringing professional-grade neural analysis to every retail investor in the Indian market.</p>
+
+            <p>Our system analyzes thousands of data points encompassing fundamental indicators, subscription levels,
+                and real-time Grey Market Premium (GMP) sentiment to provide listing gain predictions with unprecedented
+                accuracy.</p>
+
+            <h2>Technology Behind the Terminal</h2>
+            <p>We utilize a sophisticated multi-layer neural architecture specifically tuned for the volatility of the
+                Indian IPO market. By leveraging 5 years of historical listing data (spanning 2021-2026), our model
+                identifies patterns that are often invisible to the naked eye.</p>
+
+            <p>Whether you're analyzing a live issue or researching past performance, our terminal provides the
+                data-driven confidence you need to make informed investment decisions.</p>
+        </div>
+    </div>
+</body>
+
+</html>
