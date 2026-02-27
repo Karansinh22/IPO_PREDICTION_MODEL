@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Predictor Terminal | Access</title>
+    <title>Predictor Terminal | Registration</title>
     <link
         href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&family=JetBrains+Mono:wght@400;700&display=swap"
         rel="stylesheet">
@@ -161,8 +161,8 @@
             <div class="brand">
                 <h1>Predictor Terminal</h1>
             </div>
-            <h2>Welcome Back</h2>
-            <p>Access the Intelligence Grid</p>
+            <h2>New Researcher</h2>
+            <p>Create Intelligence Credentials</p>
 
             {% if error %}
             <div class="error-alert">
@@ -170,20 +170,20 @@
             </div>
             {% endif %}
 
-            <form action="/login" method="POST">
+            <form action="/register" method="POST">
                 <div class="form-group">
-                    <label>Username</label>
-                    <input type="text" name="username" required placeholder="Enter terminal ID">
+                    <label>Terminal Identity</label>
+                    <input type="text" name="username" required placeholder="Create ID">
                 </div>
                 <div class="form-group">
-                    <label>Password</label>
-                    <input type="password" name="password" required placeholder="Enter sequence">
+                    <label>Passphrase</label>
+                    <input type="password" name="password" required placeholder="Secure sequence">
                 </div>
-                <button type="submit">Initialize Link</button>
+                <button type="submit">Establish Link</button>
             </form>
 
             <div class="auth-footer">
-                New researcher? <a href="/register">Request Access</a>
+                Already registered? <a href="/login">Verify Identity</a>
             </div>
         </div>
     </div>

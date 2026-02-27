@@ -312,6 +312,59 @@
             font-weight: 600;
         }
 
+        .search-container {
+            position: relative;
+            margin-bottom: 25px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 14px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            border-radius: 14px;
+            color: white;
+            font-size: 0.95rem;
+            transition: 0.3s;
+        }
+
+        .search-input:focus {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: #667eea;
+            box-shadow: 0 0 15px rgba(102, 126, 234, 0.2);
+        }
+
+        .search-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: #1a1f2e;
+            border: 1px solid var(--glass-border);
+            border-top: none;
+            border-radius: 0 0 14px 14px;
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 100;
+            display: none;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .search-item {
+            padding: 12px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .search-item:hover {
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .search-item:last-child {
+            border-bottom: none;
+        }
+
         .status-badge {
             font-size: 0.65rem;
             padding: 2px 6px;
@@ -711,6 +764,13 @@
             <a href="#dashboard-visuals" class="nav-link">Insights Dashboard</a>
             <a href="#about" class="nav-link">About Us</a>
             <a href="#contact" class="nav-link">Contact Us</a>
+            <div class="user-pill"
+                style="margin-left: 10px; padding: 5px 15px; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); border-radius: 50px; display: flex; align-items: center; gap: 10px;">
+                <span style="font-size: 0.8rem; opacity: 0.8; font-weight: 600; color: var(--money-green);">{{
+                    current_user.username }}</span>
+                <a href="/logout"
+                    style="font-size: 0.7rem; color: #ff5757; text-decoration: none; border-left: 1px solid rgba(255,255,255,0.1); padding-left: 10px; text-transform: uppercase;">Logout</a>
+            </div>
         </div>
     </nav>
 
@@ -804,6 +864,13 @@
                     <div class="prediction-value">{{ prediction_text }}</div>
                     <div class="risk-badge risk-{{ risk_category }}">{{ risk_text }}</div>
 
+                    {% if latest_prediction_id %}
+                    <a href="/download_report/{{ latest_prediction_id }}" class="download-btn"
+                        style="display: block; width: 100%; text-align: center; margin-top: 15px; padding: 12px; background: var(--primary-gradient); color: white; border-radius: 12px; text-decoration: none; font-weight: 600; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px;">
+                        📥 Download Detailed Intel Report (PDF)
+                    </a>
+                    {% endif %}
+
                     {% if comparison_info %}
                     <div class="comparison-badge">
                         <div style="color: var(--money-green); font-weight: 600; margin-bottom: 5px;">Reality Check
@@ -837,6 +904,8 @@
                         <div style="margin-top: 8px; font-size: 0.95rem;">
                             Expected: <strong style="color: var(--money-green)">{{ item.gain }}</strong> |
                             Risk: <span class="risk-{{ item.risk }}">{{ item.risk }}</span>
+                            <a href="/download_report/{{ item.id }}"
+                                style="margin-left: 10px; color: var(--money-green); text-decoration: none; font-size: 0.8rem; border: 1px solid var(--money-green); padding: 2px 8px; border-radius: 4px;">PDF</a>
                         </div>
                         <div class="history-details">
                             {% if item.inputs %}
