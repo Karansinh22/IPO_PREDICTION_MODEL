@@ -327,7 +327,7 @@ def create_report_pdf(prediction):
         pdf.image(tmp3.name, x=10, y=pdf.get_y(), w=190)
     os.remove(tmp3.name)
     
-    return pdf.output()
+    return pdf.output(dest='S')
 
 # Load Fundamental models
 F_REGRESSOR = joblib.load('models/fundamental_regressor.pkl')
