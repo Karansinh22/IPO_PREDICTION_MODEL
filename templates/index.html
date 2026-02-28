@@ -532,14 +532,34 @@
             }
 
             .top-nav {
-                padding: 10px 20px;
-                gap: 20px;
+                padding: 15px 20px;
                 flex-direction: column;
-                align-items: center;
+                gap: 15px;
             }
 
             .nav-links {
+                flex-wrap: wrap;
+                justify-content: center;
                 gap: 15px;
+            }
+
+            .dashboard-container,
+            .guide-container,
+            .team-grid {
+                grid-template-columns: 1fr !important;
+            }
+
+            .hero h2 {
+                font-size: 2.2rem;
+            }
+
+            .footer-grid {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+
+            .footer-bottom {
+                flex-direction: column;
             }
         }
 
@@ -1593,6 +1613,13 @@
                 }
             });
         });
+
+        // Anti-Sleep Server Ping (prevents cold starts on free hosting like Render)
+        // Pings the server every 5 minutes while the page remains open.
+        setInterval(() => {
+            fetch('/ping').then(r => r.text()).then(t => console.log('Keep-alive ping:', t)).catch(e => console.error('Ping failed:', e));
+        }, 300000);
+
     </script>
 </body>
 
