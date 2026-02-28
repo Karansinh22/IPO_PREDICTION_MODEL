@@ -286,7 +286,7 @@ def create_report_pdf(prediction):
     
     # Weaknesses
     pdf.set_xy(105, y_start)
-    pdf.set_fill_color(fad := (252, 228, 236), fad, fad) # Pink-ish
+    pdf.set_fill_color(252, 228, 236) # Pink-ish
     pdf.rect(105, y_start, col_w, 40, 'F')
     pdf.set_xy(107, y_start + 2)
     pdf.set_text_color(173, 20, 87)
