@@ -209,10 +209,12 @@ def create_report_pdf(prediction):
     else:
         ax2.text(0.5, 0.5, 'No Category Data', ha='center', va='center')
     
-    img_buf = io.BytesIO()
-    fig.savefig(img_buf, format='png', bbox_inches='tight', dpi=150)
-    img_buf.seek(0)
-    pdf.image(img_buf, x=10, y=pdf.get_y(), w=190)
+    import tempfile
+    import os
+    with tempfile.NamedTemporaryFile(delete=False, suffix='.png') as tmp1:
+        fig.savefig(tmp1.name, format='png', bbox_inches='tight', dpi=150)
+        pdf.image(tmp1.name, x=10, y=pdf.get_y(), w=190)
+    os.remove(tmp1.name)
     
     # Page 2: Advanced Analytics
     pdf.add_page()
@@ -254,10 +256,10 @@ def create_report_pdf(prediction):
             for j in range(len(cols)):
                 ax4.text(j, i, f'{corr.iloc[i,j]:.2f}', ha='center', va='center', color='black', fontsize=8)
     
-    img_buf2 = io.BytesIO()
-    fig2.savefig(img_buf2, format='png', bbox_inches='tight', dpi=150)
-    img_buf2.seek(0)
-    pdf.image(img_buf2, x=10, y=pdf.get_y(), w=190)
+    with tempfile.NamedTemporaryFile(delete=False, suffix='.png') as tmp2:
+        fig2.savefig(tmp2.name, format='png', bbox_inches='tight', dpi=150)
+        pdf.image(tmp2.name, x=10, y=pdf.get_y(), w=190)
+    os.remove(tmp2.name)
     
     # Page 3: SWOT & Statistical Variance
     pdf.add_page()
@@ -320,10 +322,10 @@ def create_report_pdf(prediction):
         ax6.boxplot(data_to_plot, labels=['Low', 'Med', 'High'], patch_artist=True)
         ax6.set_title('Gain Variance by Risk Profile')
         
-    img_buf3 = io.BytesIO()
-    fig3.savefig(img_buf3, format='png', bbox_inches='tight', dpi=150)
-    img_buf3.seek(0)
-    pdf.image(img_buf3, x=10, y=pdf.get_y(), w=190)
+    with tempfile.NamedTemporaryFile(delete=False, suffix='.png') as tmp3:
+        fig3.savefig(tmp3.name, format='png', bbox_inches='tight', dpi=150)
+        pdf.image(tmp3.name, x=10, y=pdf.get_y(), w=190)
+    os.remove(tmp3.name)
     
     return pdf.output()
 
