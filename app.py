@@ -647,7 +647,8 @@ def download_report(prediction_id):
         # Sanitize filename
         safe_name = re.sub(r'[^a-zA-Z0-9]', '_', prediction.ipo_name)
         
-        response = make_response(bytes(pdf_content))
+        # FPDF 1.7.2 output(dest='S') returns a latin1 encoded string
+        response = make_response(pdf_content.encode('latin1'))
         response.headers['Content-Type'] = 'application/pdf'
         response.headers['Content-Disposition'] = f'attachment; filename=Intel_Report_{safe_name}.pdf'
         return response
