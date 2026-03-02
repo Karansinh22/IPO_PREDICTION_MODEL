@@ -161,8 +161,8 @@
             <div class="brand">
                 <h1>Predictor Terminal</h1>
             </div>
-            <h2>New Researcher</h2>
-            <p>Create Intelligence Credentials</p>
+            <h2>Register</h2>
+            <p>Create a new account</p>
 
             {% if error %}
             <div class="error-alert">
@@ -172,18 +172,18 @@
 
             <form action="/register" method="POST">
                 <div class="form-group">
-                    <label>Terminal Identity</label>
-                    <input type="text" name="username" required placeholder="Create ID">
+                    <label>Username</label>
+                    <input type="text" name="username" required placeholder="Enter username">
                 </div>
                 <div class="form-group">
-                    <label>Passphrase</label>
-                    <input type="password" name="password" required placeholder="Secure sequence">
+                    <label>Password</label>
+                    <input type="password" name="password" required placeholder="Enter password">
                 </div>
-                <button type="submit">Establish Link</button>
+                <button type="submit">Register</button>
             </form>
 
             <div class="auth-footer">
-                Already registered? <a href="/login">Verify Identity</a>
+                Already registered? <a href="/login">Login</a>
             </div>
         </div>
     </div>
