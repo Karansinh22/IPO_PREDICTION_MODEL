@@ -1575,17 +1575,20 @@
                     }
                 });
 
-                // === Chart 3: Heatmap as Radar (placeholder until stock selected) ===
+                // === Chart 3: Metric Radar — initialized with REAL market average profile ===
+                const marketRadar = marketInsightsData.market_radar || [50, 50, 50, 50];
                 charts.heatmap = new Chart(document.getElementById('heatmapChart'), {
                     type: 'radar',
                     data: {
                         labels: ['Issue Size', 'Offer Price', 'Subscription', 'Listing Gain'],
                         datasets: [{
-                            label: 'Select a stock to see its profile',
-                            data: [50, 50, 50, 50],
-                            borderColor: 'rgba(255,255,255,0.15)',
-                            backgroundColor: 'rgba(255,255,255,0.03)',
-                            pointBackgroundColor: 'rgba(255,255,255,0.2)'
+                            label: 'Market Average Profile',
+                            data: marketRadar,
+                            borderColor: '#667eea',
+                            backgroundColor: 'rgba(102,126,234,0.15)',
+                            pointBackgroundColor: '#667eea',
+                            pointRadius: 4,
+                            borderWidth: 2
                         }]
                     },
                     options: {
@@ -1603,10 +1606,9 @@
                     }
                 });
 
-                // === Chart 4: Boxplot simulation as combined bar chart ===
-                const bpRes = await fetch('/get_stock_insights');
-                const bpData = await bpRes.json();
-                drawBoxplotChart(bpData, null);
+                // === Chart 4: Boxplot — initialized with market-wide boxplot data from same API call ===
+                const initBoxplotData = { boxplot: marketInsightsData.boxplot || {}, stock_gain: null };
+                drawBoxplotChart(initBoxplotData, null);
 
                 // If server has an IPO from a POST prediction, highlight it
                 const serverIpoEl = document.getElementById('__server_data__');
@@ -1623,6 +1625,7 @@
                 console.error("initCharts error:", err);
             }
         }
+
 
         function drawBoxplotChart(stockInsights, stockName) {
             const bp = stockInsights.boxplot || {};
@@ -1765,30 +1768,36 @@
                 const siRes = await fetch(`/get_stock_insights?name=${encodeURIComponent(name)}`);
                 const si = await siRes.json();
 
-                // --- Chart 3: Heatmap as Radar (percentile rank of stock's metrics) ---
+                // --- Chart 3: Metric Radar (percentile rank of stock's metrics vs market) ---
                 if (si.heatmap && si.heatmap.stock_values) {
-                    if (charts.heatmap.data.datasets.length > 1) charts.heatmap.data.datasets.splice(1);
-                    // Keep market average reference (all at 50th percentile line)
-                    charts.heatmap.data.datasets[0] = {
-                        label: 'Market Median (50th pctile)',
-                        data: [50, 50, 50, 50],
-                        borderColor: 'rgba(255,255,255,0.2)',
-                        backgroundColor: 'rgba(255,255,255,0.04)',
-                        pointBackgroundColor: 'rgba(255,255,255,0.3)',
-                        borderDash: [4, 4]
-                    };
-                    charts.heatmap.data.datasets.push({
-                        label: name + ' Percentile Rank',
-                        data: si.heatmap.stock_values,
-                        borderColor: '#667eea',
-                        backgroundColor: 'rgba(102,126,234,0.2)',
-                        pointBackgroundColor: '#667eea',
-                        pointRadius: 5
-                    });
+                    const mRadar = (marketInsightsData && marketInsightsData.market_radar) || [50, 50, 50, 50];
+                    // Rebuild datasets: [0] = market profile, [1] = stock profile
+                    charts.heatmap.data.datasets = [
+                        {
+                            label: 'Market Avg Profile',
+                            data: mRadar,
+                            borderColor: 'rgba(102,126,234,0.5)',
+                            backgroundColor: 'rgba(102,126,234,0.08)',
+                            pointBackgroundColor: 'rgba(102,126,234,0.7)',
+                            pointRadius: 3,
+                            borderDash: [4, 4],
+                            borderWidth: 1.5
+                        },
+                        {
+                            label: name + ' Profile',
+                            data: si.heatmap.stock_values,
+                            borderColor: '#22c55e',
+                            backgroundColor: 'rgba(34,197,94,0.15)',
+                            pointBackgroundColor: '#22c55e',
+                            pointRadius: 5,
+                            borderWidth: 2
+                        }
+                    ];
                     document.getElementById('heatmap-title').innerText = name + ' — Metric Strength';
                     document.getElementById('heatmap-subtitle').innerText = 'Percentile rank vs all historical IPOs (higher = stronger)';
                     charts.heatmap.update();
                 }
+
 
                 // --- Chart 4: Boxplot - redraw with stock marker ---
                 drawBoxplotChart(si, name);

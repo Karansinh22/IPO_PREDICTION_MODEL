@@ -656,12 +656,49 @@ def get_market_insights():
         'avg_size': float(df['Issue_Size(crores)'].mean())
     }
 
+    # 5. Market radar: percentile rank of each market *average* value
+    #    (gives a meaningful default spider chart that shows typical IPO profile)
+    radar_cols = ['Issue_Size(crores)', 'Offer Price', 'Total', 'Listing Gain']
+    radar_avg_vals = [df[c].mean() for c in radar_cols]
+    market_radar = []
+    for col, val in zip(radar_cols, radar_avg_vals):
+        try:
+            pct = float((df[col] <= val).mean() * 100)
+            market_radar.append(round(pct, 1))
+        except:
+            market_radar.append(50.0)
+
+    # 6. Boxplot data (market-wide, no stock selected)
+    def simple_risk_bp(gain):
+        if gain > 25: return 'Low Risk'
+        elif gain >= 10: return 'Medium Risk'
+        else: return 'High Risk'
+    df['Risk_Cat_BP'] = df['Listing Gain'].apply(simple_risk_bp)
+    boxplot_data = {}
+    for cat in ['Low Risk', 'Medium Risk', 'High Risk']:
+        gains = df[df['Risk_Cat_BP'] == cat]['Listing Gain'].dropna().tolist()
+        if gains:
+            arr = sorted(gains)
+            q1 = float(np.percentile(arr, 25))
+            median = float(np.percentile(arr, 50))
+            q3 = float(np.percentile(arr, 75))
+            iqr = q3 - q1
+            boxplot_data[cat] = {
+                'q1': round(q1, 2), 'median': round(median, 2), 'q3': round(q3, 2),
+                'min': round(float(max(min(arr), q1 - 1.5 * iqr)), 2),
+                'max': round(float(min(max(arr), q3 + 1.5 * iqr)), 2),
+                'count': len(arr)
+            }
+
     return jsonify({
         'yearly_trend': yearly_trend,
         'correlation': correlation_data,
         'risk_dist': risk_dist,
-        'averages': market_averages
+        'averages': market_averages,
+        'market_radar': market_radar,
+        'boxplot': boxplot_data
     })
+
 
 @app.route('/predict', methods=['POST'])
 @login_required
