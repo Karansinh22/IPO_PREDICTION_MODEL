@@ -224,8 +224,9 @@ def create_report_pdf(prediction):
     pdf.ln(5)
     
     fig2 = Figure(figsize=(10, 8))
+    fig2.patch.set_facecolor('#f9f9f9')
     
-    # 4.1 Historical Trend (Line)
+    # 4.1 Historical Trend — with stock-specific gain highlighted
     ax3 = fig2.add_subplot(211)
     if not ipo_data.empty:
         df = ipo_data.copy()
@@ -233,33 +234,67 @@ def create_report_pdf(prediction):
         df = df.dropna(subset=['Date'])
         df['Year'] = df['Date'].dt.year
         trend = df.groupby('Year')['Listing Gain'].mean()
-        ax3.plot(trend.index, trend.values, marker='o', color='#3498db', linewidth=2)
+
+        # Plot market average trend line
+        ax3.plot(trend.index, trend.values, marker='o', color='#3498db', linewidth=2, label='Market Avg Gain %')
         ax3.fill_between(trend.index, trend.values, alpha=0.1, color='#3498db')
-        ax3.set_title('Historical Market Performance (Yearly Avg Gain %)')
+
+        # Draw dashed horizontal line at this IPO's gain
+        ax3.axhline(y=gain_val, color='#e74c3c', linestyle='--', linewidth=1.5, label=f'{prediction.ipo_name}: {gain_val:.1f}%')
+
+        # Try to find this IPO in dataset and mark its year
+        ipo_matches = df[df['IPO_Name'].str.lower().str.contains(prediction.ipo_name.lower(), na=False)]
+        if not ipo_matches.empty:
+            ipo_year = ipo_matches.iloc[0]['Year']
+            ipo_actual_gain = ipo_matches.iloc[0]['Listing Gain']
+            if pd.notnull(ipo_year) and pd.notnull(ipo_actual_gain):
+                ax3.scatter([ipo_year], [ipo_actual_gain], color='#e74c3c', s=120,
+                           zorder=5, marker='*', label=f'Listed in {int(ipo_year)}')
+
+        ax3.set_title(f'{prediction.ipo_name} — Gain vs Historical Market Trend')
+        ax3.set_ylabel('Avg Listing Gain %')
+        ax3.legend(fontsize=8)
         ax3.grid(True, alpha=0.2)
     
-    # 4.2 Feature Heatmap (Correlation)
+    # 4.2 Metric Radar — Stock's percentile rank vs market (specific to this IPO)
     ax4 = fig2.add_subplot(212)
     if not ipo_data.empty:
-        cols = ['Issue_Size(crores)', 'Offer Price', 'Total', 'Listing Gain']
-        corr = ipo_data[cols].corr()
-        im = ax4.imshow(corr, cmap='RdYlGn', interpolation='nearest')
-        ax4.set_xticks(range(len(cols)))
-        ax4.set_yticks(range(len(cols)))
-        ax4.set_xticklabels(cols, fontsize=8, rotation=15)
-        ax4.set_yticklabels(cols, fontsize=8)
-        fig2.colorbar(im, ax=ax4)
-        ax4.set_title('Market Feature Correlation Matrix')
-        
-        # Add labels to heatmap
-        for i in range(len(cols)):
-            for j in range(len(cols)):
-                ax4.text(j, i, f'{corr.iloc[i,j]:.2f}', ha='center', va='center', color='black', fontsize=8)
+        metric_cols = ['Issue_Size(crores)', 'Offer Price', 'Total', 'Listing Gain']
+        metric_labels = ['Issue Size', 'Offer Price', 'Subscription', 'Listing Gain']
+        stock_pctile = []
+        for col, key in zip(metric_cols, ['Issue_Size(crores)', 'Offer Price', 'Total', None]):
+            try:
+                if col == 'Listing Gain':
+                    val = gain_val
+                elif key and key in inputs:
+                    val = float(inputs[key])
+                else:
+                    val = None
+                if val is not None:
+                    pct = float((ipo_data[col] <= val).mean() * 100)
+                    stock_pctile.append(round(pct, 1))
+                else:
+                    stock_pctile.append(50.0)
+            except:
+                stock_pctile.append(50.0)
+
+        colors_bar = ['#e74c3c' if p < 25 else ('#f39c12' if p < 75 else '#2ecc71') for p in stock_pctile]
+        bars = ax4.barh(metric_labels, stock_pctile, color=colors_bar, edgecolor='white', linewidth=0.5)
+        ax4.axvline(x=50, color='#333', linestyle='--', linewidth=1, alpha=0.5, label='Market Median')
+        for bar, val in zip(bars, stock_pctile):
+            ax4.text(val + 1, bar.get_y() + bar.get_height() / 2,
+                    f'{val:.0f}th pctile', va='center', fontsize=8)
+        ax4.set_xlim(0, 110)
+        ax4.set_xlabel('Percentile Rank vs All IPOs (%)')
+        ax4.set_title(f'{prediction.ipo_name} — Metric Strength vs Market')
+        ax4.legend(fontsize=8)
+        ax4.grid(axis='x', alpha=0.2)
     
     with tempfile.NamedTemporaryFile(delete=False, suffix='.png') as tmp2:
         fig2.savefig(tmp2.name, format='png', bbox_inches='tight', dpi=150)
         pdf.image(tmp2.name, x=10, y=pdf.get_y(), w=190)
     os.remove(tmp2.name)
+
     
     # Page 3: SWOT & Statistical Variance
     pdf.add_page()
@@ -317,10 +352,32 @@ def create_report_pdf(prediction):
     if not ipo_data.empty:
         df_box = ipo_data.copy()
         # Simplified risk categorization for boxplot
+        # Determine which risk category the current stock falls in
+        if gain_val > 25:
+            stock_risk_cat = 'Low'
+        elif gain_val >= 5:
+            stock_risk_cat = 'Med'
+        else:
+            stock_risk_cat = 'High'
+
         df_box['Risk_Cat'] = df_box['Listing Gain'].apply(lambda x: 'Low' if x > 25 else ('High' if x < 5 else 'Med'))
-        data_to_plot = [df_box[df_box['Risk_Cat'] == r]['Listing Gain'].dropna() for r in ['Low', 'Med', 'High']]
-        ax6.boxplot(data_to_plot, labels=['Low', 'Med', 'High'], patch_artist=True)
-        ax6.set_title('Gain Variance by Risk Profile')
+        cat_order = ['Low', 'Med', 'High']
+        data_to_plot = [df_box[df_box['Risk_Cat'] == r]['Listing Gain'].dropna() for r in cat_order]
+        box_colors = ['#2ecc71', '#f39c12', '#e74c3c']
+        bp = ax6.boxplot(data_to_plot, labels=['Low Risk\n(>25%)', 'Med Risk\n(5-25%)', 'High Risk\n(<5%)'],
+                         patch_artist=True, medianprops=dict(color='black', linewidth=2))
+        for patch, color in zip(bp['boxes'], box_colors):
+            patch.set_facecolor(color)
+            patch.set_alpha(0.5)
+
+        # Highlight the selected stock's gain as a star marker in its box
+        cat_idx = cat_order.index(stock_risk_cat) + 1  # boxplot positions are 1-indexed
+        ax6.scatter([cat_idx], [gain_val], color='#c0392b', s=150, zorder=5, marker='D',
+                    label=f'{prediction.ipo_name}: {gain_val:.1f}%')
+        ax6.legend(fontsize=8)
+        ax6.set_title(f'{prediction.ipo_name} — Gain Distribution by Risk Profile')
+        ax6.set_ylabel('Listing Gain %')
+
         
     with tempfile.NamedTemporaryFile(delete=False, suffix='.png') as tmp3:
         fig3.savefig(tmp3.name, format='png', bbox_inches='tight', dpi=150)
