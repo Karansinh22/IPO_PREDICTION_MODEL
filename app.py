@@ -471,6 +471,97 @@ def search():
             
     return jsonify(search_results)
 
+@app.route('/get_stock_insights')
+@login_required
+def get_stock_insights():
+    global ipo_data
+    if ipo_data.empty:
+        load_ipo_data()
+    if ipo_data.empty:
+        return jsonify({})
+
+    ipo_name = request.args.get('name', '').strip()
+    df = ipo_data.copy()
+    df['Date'] = pd.to_datetime(df['Date'], errors='coerce')
+    df['Year'] = df['Date'].dt.year
+
+    # Find the selected stock row
+    stock_row = None
+    if ipo_name:
+        matches = df[df['IPO_Name'].str.lower() == ipo_name.lower()]
+        if matches.empty:
+            matches = df[df['IPO_Name'].str.lower().str.contains(ipo_name.lower(), na=False)]
+        if not matches.empty:
+            stock_row = matches.iloc[0]
+
+    # 1. Heatmap data: correlation matrix values for ALL stocks + highlight selected stock's values
+    cols = ['Issue_Size(crores)', 'Offer Price', 'Total', 'Listing Gain']
+    corr = df[cols].corr()
+    heatmap_data = {
+        'labels': ['Issue Size', 'Offer Price', 'Subscription', 'Listing Gain'],
+        'matrix': corr.values.tolist(),
+        'stock_values': None
+    }
+    if stock_row is not None:
+        # Normalize values (percentile rank) so they can be visualized comparably
+        stock_vals = []
+        for c in cols:
+            try:
+                val = float(stock_row[c]) if pd.notnull(stock_row[c]) else None
+                if val is not None:
+                    pct = float((df[c] <= val).mean() * 100)
+                    stock_vals.append(round(pct, 1))
+                else:
+                    stock_vals.append(None)
+            except:
+                stock_vals.append(None)
+        heatmap_data['stock_values'] = stock_vals
+        heatmap_data['stock_name'] = str(stock_row['IPO_Name'])
+
+    # 2. Boxplot data: gain distribution bucketed by risk category, + where the selected stock sits
+    def simple_risk(gain):
+        if gain > 25: return 'Low Risk'
+        elif gain >= 10: return 'Medium Risk'
+        else: return 'High Risk'
+
+    df['Risk_Cat'] = df['Listing Gain'].apply(simple_risk)
+
+    boxplot_data = {}
+    for cat in ['Low Risk', 'Medium Risk', 'High Risk']:
+        gains = df[df['Risk_Cat'] == cat]['Listing Gain'].dropna().tolist()
+        if gains:
+            arr = sorted(gains)
+            q1 = float(np.percentile(arr, 25))
+            median = float(np.percentile(arr, 50))
+            q3 = float(np.percentile(arr, 75))
+            iqr = q3 - q1
+            whisker_low = float(max(min(arr), q1 - 1.5 * iqr))
+            whisker_high = float(min(max(arr), q3 + 1.5 * iqr))
+            boxplot_data[cat] = {
+                'q1': round(q1, 2), 'median': round(median, 2), 'q3': round(q3, 2),
+                'min': round(whisker_low, 2), 'max': round(whisker_high, 2),
+                'count': len(arr)
+            }
+
+    stock_gain = None
+    stock_risk_cat = None
+    if stock_row is not None:
+        try:
+            stock_gain = float(stock_row['Listing Gain']) if pd.notnull(stock_row['Listing Gain']) else None
+            if stock_gain is not None:
+                stock_risk_cat = simple_risk(stock_gain)
+        except:
+            pass
+
+    return jsonify({
+        'heatmap': heatmap_data,
+        'boxplot': boxplot_data,
+        'stock_gain': stock_gain,
+        'stock_risk_cat': stock_risk_cat,
+        'stock_name': str(stock_row['IPO_Name']) if stock_row is not None else ipo_name
+    })
+
+
 @app.route('/get_market_insights')
 @login_required
 def get_market_insights():

@@ -1164,18 +1164,34 @@
             </div>
         </div>
 
-        <div class="dashboard-container" id="dashboard-visuals">
+        <div class="dashboard-container" id="dashboard-visuals" style="grid-template-columns: 1fr 1fr;">
             <h2
                 style="grid-column: 1 / -1; margin-bottom: 20px; color: var(--money-green); text-transform: uppercase; letter-spacing: 2px;">
                 <span style="color: #fff;">02</span> Insights Dashboard
             </h2>
             <div class="chart-card">
-                <h3 id="trend-title" style="margin: 0 0 20px 0;">Market Growth Context</h3>
+                <h3 id="trend-title" style="margin: 0 0 10px 0;">Market Growth Context</h3>
+                <p id="trend-subtitle" style="font-size:0.78rem; opacity:0.5; margin:0 0 12px;">Historical yearly
+                    average listing gain %</p>
                 <div class="chart-container"><canvas id="trendChart"></canvas></div>
             </div>
             <div class="chart-card">
-                <h3 id="benchmark-title" style="margin: 0 0 20px 0;">Market Benchmark</h3>
+                <h3 id="benchmark-title" style="margin: 0 0 10px 0;">Market Benchmark</h3>
+                <p id="benchmark-subtitle" style="font-size:0.78rem; opacity:0.5; margin:0 0 12px;">Comparing key
+                    metrics vs market average</p>
                 <div class="chart-container"><canvas id="benchmarkChart"></canvas></div>
+            </div>
+            <div class="chart-card">
+                <h3 id="heatmap-title" style="margin: 0 0 10px 0;">Metric Strength Radar</h3>
+                <p id="heatmap-subtitle" style="font-size:0.78rem; opacity:0.5; margin:0 0 12px;">Select a stock to see
+                    its percentile rank across key metrics</p>
+                <div class="chart-container"><canvas id="heatmapChart"></canvas></div>
+            </div>
+            <div class="chart-card">
+                <h3 id="boxplot-title" style="margin: 0 0 10px 0;">Gain Distribution by Risk Profile</h3>
+                <p id="boxplot-subtitle" style="font-size:0.78rem; opacity:0.5; margin:0 0 12px;">Market-wide listing
+                    gain spread — stock's position highlighted</p>
+                <div class="chart-container"><canvas id="boxplotChart"></canvas></div>
             </div>
         </div>
 
@@ -1392,6 +1408,15 @@
             const form = document.getElementById('predictor-form');
             form.style.boxShadow = "0 0 20px rgba(34, 197, 94, 0.4)";
             setTimeout(() => form.style.boxShadow = "none", 1000);
+
+            // Update charts with selected IPO data
+            updateCharts({
+                name: ipo.name,
+                gain: ipo.actual_gain || ipo.gain || null,
+                total: ipo.total || 0,
+                issue_size: ipo.size || 0,
+                year: ipo.year || null
+            });
         }
 
         sInput.addEventListener('focus', () => {
@@ -1419,6 +1444,15 @@
 
             sInput.value = data.name;
             sResults.style.display = 'none';
+
+            // Update charts immediately with historical stock data
+            updateCharts({
+                name: data.name,
+                gain: data.gain || null,
+                total: data.total || 0,
+                issue_size: data.issue_size || 0,
+                year: data.year || null
+            });
         }
 
         function toggleHistoryExpand() {
@@ -1470,6 +1504,13 @@
             });
         }
 
+        let marketInsightsData = null; // Cache for market-wide data
+
+        const CHART_DEFAULTS = {
+            color: { axes: '#f5f5dc', grid: 'rgba(255,255,255,0.05)' },
+            plugins: { legend: { labels: { color: '#f5f5dc', font: { size: 11 } } } }
+        };
+
         async function initCharts() {
             try {
                 console.log("Initializing charts...");
@@ -1478,46 +1519,100 @@
                     return;
                 }
                 const res = await fetch('/get_market_insights');
-                const data = await res.json();
-                if (!data.yearly_trend) return;
+                marketInsightsData = await res.json();
+                if (!marketInsightsData.yearly_trend) return;
 
-                const years = Object.keys(data.yearly_trend).sort();
+                const years = Object.keys(marketInsightsData.yearly_trend).sort();
+
+                // === Chart 1: Trend Line ===
                 charts.trend = new Chart(document.getElementById('trendChart'), {
                     type: 'line',
                     data: {
                         labels: years,
                         datasets: [{
                             label: 'Market Avg Gain %',
-                            data: years.map(y => data.yearly_trend[y]),
+                            data: years.map(y => marketInsightsData.yearly_trend[y]),
                             borderColor: '#22c55e',
-                            backgroundColor: 'rgba(34, 197, 94, 0.1)',
-                            fill: true, tension: 0.4
+                            backgroundColor: 'rgba(34, 197, 94, 0.08)',
+                            fill: true, tension: 0.4, pointRadius: 4,
+                            pointBackgroundColor: '#22c55e'
                         }]
                     },
-                    options: { maintainAspectRatio: false, plugins: { legend: { display: false } } }
+                    options: {
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: true, labels: { color: '#f5f5dc', font: { size: 10 } } } },
+                        scales: {
+                            x: { ticks: { color: '#f5f5dc' }, grid: { color: CHART_DEFAULTS.color.grid } },
+                            y: { ticks: { color: '#f5f5dc', callback: v => v + '%' }, grid: { color: CHART_DEFAULTS.color.grid } }
+                        }
+                    }
                 });
 
+                // === Chart 2: Benchmark Bar ===
                 charts.benchmark = new Chart(document.getElementById('benchmarkChart'), {
                     type: 'bar',
                     data: {
-                        labels: ['Gain %', 'Sub (x10)', 'Size (Cr/100)'],
+                        labels: ['Gain %', 'Subscription (x)', 'Issue Size (÷100 Cr)'],
                         datasets: [{
-                            label: 'Market Default',
-                            data: [data.averages.avg_gain, data.averages.avg_sub * 10, data.averages.avg_size / 100],
-                            backgroundColor: 'rgba(255,255,255,0.1)',
-                            borderColor: 'rgba(255,255,255,0.2)',
+                            label: 'Market Average',
+                            data: [
+                                marketInsightsData.averages.avg_gain,
+                                marketInsightsData.averages.avg_sub,
+                                marketInsightsData.averages.avg_size / 100
+                            ],
+                            backgroundColor: 'rgba(102,126,234,0.4)',
+                            borderColor: 'rgba(102,126,234,0.8)',
                             borderWidth: 1
                         }]
                     },
-                    options: { maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: '#f5f5dc' } } } }
+                    options: {
+                        maintainAspectRatio: false,
+                        plugins: { legend: { position: 'bottom', labels: { color: '#f5f5dc', font: { size: 10 } } } },
+                        scales: {
+                            x: { ticks: { color: '#f5f5dc', font: { size: 10 } }, grid: { color: CHART_DEFAULTS.color.grid } },
+                            y: { ticks: { color: '#f5f5dc' }, grid: { color: CHART_DEFAULTS.color.grid } }
+                        }
+                    }
                 });
 
+                // === Chart 3: Heatmap as Radar (placeholder until stock selected) ===
+                charts.heatmap = new Chart(document.getElementById('heatmapChart'), {
+                    type: 'radar',
+                    data: {
+                        labels: ['Issue Size', 'Offer Price', 'Subscription', 'Listing Gain'],
+                        datasets: [{
+                            label: 'Select a stock to see its profile',
+                            data: [50, 50, 50, 50],
+                            borderColor: 'rgba(255,255,255,0.15)',
+                            backgroundColor: 'rgba(255,255,255,0.03)',
+                            pointBackgroundColor: 'rgba(255,255,255,0.2)'
+                        }]
+                    },
+                    options: {
+                        maintainAspectRatio: false,
+                        plugins: { legend: { labels: { color: '#f5f5dc', font: { size: 10 } } } },
+                        scales: {
+                            r: {
+                                beginAtZero: true, min: 0, max: 100,
+                                ticks: { color: '#f5f5dc', backdropColor: 'transparent', stepSize: 25, callback: v => v + '%' },
+                                grid: { color: 'rgba(255,255,255,0.08)' },
+                                pointLabels: { color: '#f5f5dc', font: { size: 10 } },
+                                angleLines: { color: 'rgba(255,255,255,0.08)' }
+                            }
+                        }
+                    }
+                });
 
+                // === Chart 4: Boxplot simulation as combined bar chart ===
+                const bpRes = await fetch('/get_stock_insights');
+                const bpData = await bpRes.json();
+                drawBoxplotChart(bpData, null);
+
+                // If server has an IPO from a POST prediction, highlight it
                 const serverIpoEl = document.getElementById('__server_data__');
                 if (serverIpoEl && serverIpoEl.dataset.ipo) {
                     try {
                         const ipoData = JSON.parse(serverIpoEl.dataset.ipo);
-                        console.log("Highlighting selected IPO data...");
                         updateCharts(ipoData);
                     } catch (parseErr) {
                         console.error("Failed to parse server IPO data:", parseErr);
@@ -1529,37 +1624,179 @@
             }
         }
 
-        function updateCharts(selected) {
-            try {
-                if (!charts.trend || !charts.benchmark) return;
+        function drawBoxplotChart(stockInsights, stockName) {
+            const bp = stockInsights.boxplot || {};
+            const categories = ['High Risk', 'Medium Risk', 'Low Risk'];
+            const colors = ['rgba(248,113,113,0.7)', 'rgba(251,191,36,0.7)', 'rgba(34,197,94,0.7)'];
+            const borderColors = ['#f87171', '#fbbf24', '#22c55e'];
 
-                if (charts.trend.data.datasets.length > 1) charts.trend.data.datasets.pop();
-                const yearIdx = charts.trend.data.labels.indexOf(selected.year ? selected.year.toString() : "");
+            // Build visible bars: show IQR (q1 to q3) as the main bars, using floating bar trick
+            const iqrData = categories.map(c => bp[c] ? [bp[c].q1, bp[c].q3] : [0, 0]);
+            const medianData = categories.map(c => bp[c] ? bp[c].median : 0);
+
+            const datasets = [
+                {
+                    label: 'IQR (Q1–Q3)',
+                    data: iqrData,
+                    backgroundColor: colors,
+                    borderColor: borderColors,
+                    borderWidth: 2,
+                    borderSkipped: false,
+                },
+                {
+                    label: 'Median',
+                    data: medianData,
+                    type: 'line',
+                    fill: false,
+                    borderColor: '#fff',
+                    backgroundColor: '#fff',
+                    pointRadius: 6,
+                    pointStyle: 'rectRot',
+                    showLine: false
+                }
+            ];
+
+            // If stock gain known, add a marker line
+            if (stockInsights.stock_gain !== null && stockInsights.stock_gain !== undefined) {
+                const gainVal = stockInsights.stock_gain;
+                datasets.push({
+                    label: (stockName || stockInsights.stock_name || 'Selected Stock') + ' Gain',
+                    data: [gainVal, gainVal, gainVal],
+                    type: 'line',
+                    fill: false,
+                    borderColor: '#667eea',
+                    backgroundColor: '#667eea',
+                    pointRadius: 8,
+                    pointStyle: 'star',
+                    showLine: false,
+                    borderDash: [5, 5]
+                });
+            }
+
+            if (charts.boxplot) {
+                charts.boxplot.data.datasets = datasets;
+                charts.boxplot.update();
+            } else {
+                charts.boxplot = new Chart(document.getElementById('boxplotChart'), {
+                    type: 'bar',
+                    data: { labels: categories, datasets },
+                    options: {
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'bottom', labels: { color: '#f5f5dc', font: { size: 10 }, usePointStyle: true } },
+                            tooltip: {
+                                callbacks: {
+                                    label: (ctx) => {
+                                        if (ctx.dataset.label === 'IQR (Q1–Q3)') {
+                                            const cat = categories[ctx.dataIndex];
+                                            const d = bp[cat];
+                                            return d ? [`Min: ${d.min}%`, `Q1: ${d.q1}%`, `Median: ${d.median}%`, `Q3: ${d.q3}%`, `Max: ${d.max}%`] : [];
+                                        }
+                                        return `${ctx.dataset.label}: ${ctx.parsed.y}%`;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: { ticks: { color: '#f5f5dc' }, grid: { color: CHART_DEFAULTS.color.grid } },
+                            y: {
+                                ticks: { color: '#f5f5dc', callback: v => v + '%' },
+                                grid: { color: CHART_DEFAULTS.color.grid },
+                                title: { display: true, text: 'Listing Gain %', color: '#f5f5dc' }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        async function updateCharts(selected) {
+            try {
+                if (!charts.trend || !charts.benchmark || !charts.heatmap) return;
+                const name = selected.name || 'Selected IPO';
+
+                // --- Chart 1: Trend - highlight stock's year with a dot ---
+                if (charts.trend.data.datasets.length > 1) charts.trend.data.datasets.splice(1);
+                const yearIdx = charts.trend.data.labels.indexOf(selected.year ? selected.year.toString() : '');
+                // Add a horizontal reference line at the stock's gain level
+                const numYears = charts.trend.data.labels.length;
+                charts.trend.data.datasets.push({
+                    label: name + ' Gain',
+                    data: new Array(numYears).fill(selected.gain),
+                    borderColor: 'rgba(102,126,234,0.6)',
+                    backgroundColor: 'transparent',
+                    borderDash: [6, 4],
+                    fill: false,
+                    tension: 0,
+                    pointRadius: 0
+                });
                 if (yearIdx !== -1) {
-                    const hl = new Array(charts.trend.data.labels.length).fill(null);
+                    const hl = new Array(numYears).fill(null);
                     hl[yearIdx] = selected.gain;
                     charts.trend.data.datasets.push({
-                        label: selected.name,
+                        label: name + ' (Year)',
                         data: hl,
-                        pointRadius: 10,
-                        backgroundColor: '#fff',
+                        pointRadius: 9,
+                        pointStyle: 'star',
+                        backgroundColor: '#667eea',
+                        borderColor: '#fff',
+                        borderWidth: 2,
                         showLine: false
                     });
                 }
-
-                if (charts.benchmark.data.datasets.length > 1) charts.benchmark.data.datasets.pop();
-                charts.benchmark.data.datasets.push({
-                    label: 'Selected: ' + selected.name,
-                    data: [selected.gain, selected.total * 10, selected.issue_size / 100],
-                    backgroundColor: 'rgba(34, 197, 94, 0.8)'
-                });
-
-                document.getElementById('trend-title').innerText = selected.name + ' vs Market Trend';
-                document.getElementById('benchmark-title').innerText = selected.name + ' Performance Index';
-
+                document.getElementById('trend-title').innerText = name + ' vs Market Trend';
+                document.getElementById('trend-subtitle').innerText = `Dashed line = ${selected.gain !== null ? selected.gain.toFixed(1) + '% gain' : 'N/A'} | Star = listing year`;
                 charts.trend.update();
+
+                // --- Chart 2: Benchmark - highlight selected stock's metrics ---
+                if (charts.benchmark.data.datasets.length > 1) charts.benchmark.data.datasets.splice(1);
+                charts.benchmark.data.datasets.push({
+                    label: name,
+                    data: [selected.gain, selected.total, selected.issue_size / 100],
+                    backgroundColor: 'rgba(34, 197, 94, 0.8)',
+                    borderColor: '#22c55e',
+                    borderWidth: 1
+                });
+                document.getElementById('benchmark-title').innerText = name + ' vs Market';
+                document.getElementById('benchmark-subtitle').innerText = 'Green bars = selected IPO | Purple = market average';
                 charts.benchmark.update();
-                console.log("Charts updated.");
+
+                // --- Charts 3 & 4: Fetch stock-specific insights ---
+                const siRes = await fetch(`/get_stock_insights?name=${encodeURIComponent(name)}`);
+                const si = await siRes.json();
+
+                // --- Chart 3: Heatmap as Radar (percentile rank of stock's metrics) ---
+                if (si.heatmap && si.heatmap.stock_values) {
+                    if (charts.heatmap.data.datasets.length > 1) charts.heatmap.data.datasets.splice(1);
+                    // Keep market average reference (all at 50th percentile line)
+                    charts.heatmap.data.datasets[0] = {
+                        label: 'Market Median (50th pctile)',
+                        data: [50, 50, 50, 50],
+                        borderColor: 'rgba(255,255,255,0.2)',
+                        backgroundColor: 'rgba(255,255,255,0.04)',
+                        pointBackgroundColor: 'rgba(255,255,255,0.3)',
+                        borderDash: [4, 4]
+                    };
+                    charts.heatmap.data.datasets.push({
+                        label: name + ' Percentile Rank',
+                        data: si.heatmap.stock_values,
+                        borderColor: '#667eea',
+                        backgroundColor: 'rgba(102,126,234,0.2)',
+                        pointBackgroundColor: '#667eea',
+                        pointRadius: 5
+                    });
+                    document.getElementById('heatmap-title').innerText = name + ' — Metric Strength';
+                    document.getElementById('heatmap-subtitle').innerText = 'Percentile rank vs all historical IPOs (higher = stronger)';
+                    charts.heatmap.update();
+                }
+
+                // --- Chart 4: Boxplot - redraw with stock marker ---
+                drawBoxplotChart(si, name);
+                const riskLabel = si.stock_risk_cat ? ` — falls in: ${si.stock_risk_cat}` : '';
+                document.getElementById('boxplot-title').innerText = name + ' — Gain Distribution';
+                document.getElementById('boxplot-subtitle').innerText = `Star (★) = ${name}'s actual gain${riskLabel}`;
+
+                console.log("All charts updated for:", name);
             } catch (err) {
                 console.error("updateCharts error:", err);
             }
