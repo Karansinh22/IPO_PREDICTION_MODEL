@@ -1771,7 +1771,6 @@
                 // --- Chart 3: Metric Radar (percentile rank of stock's metrics vs market) ---
                 if (si.heatmap && si.heatmap.stock_values) {
                     const mRadar = (marketInsightsData && marketInsightsData.market_radar) || [50, 50, 50, 50];
-                    // Rebuild datasets: [0] = market profile, [1] = stock profile
                     charts.heatmap.data.datasets = [
                         {
                             label: 'Market Avg Profile',
@@ -1795,15 +1794,37 @@
                     ];
                     document.getElementById('heatmap-title').innerText = name + ' — Metric Strength';
                     document.getElementById('heatmap-subtitle').innerText = 'Percentile rank vs all historical IPOs (higher = stronger)';
-                    charts.heatmap.update();
+                } else {
+                    const mRadar = (marketInsightsData && marketInsightsData.market_radar) || [50, 50, 50, 50];
+                    charts.heatmap.data.datasets = [
+                        {
+                            label: 'Market Avg Profile',
+                            data: mRadar,
+                            borderColor: 'rgba(102,126,234,0.5)',
+                            backgroundColor: 'rgba(102,126,234,0.08)',
+                            pointBackgroundColor: 'rgba(102,126,234,0.7)',
+                            pointRadius: 3,
+                            borderDash: [4, 4],
+                            borderWidth: 1.5
+                        }
+                    ];
+                    document.getElementById('heatmap-title').innerText = name + ' — Metric Strength';
+                    document.getElementById('heatmap-subtitle').innerText = 'No historical data available for this custom IPO';
                 }
+                charts.heatmap.update();
 
 
                 // --- Chart 4: Boxplot - redraw with stock marker ---
+                if (si.stock_gain === null || si.stock_gain === undefined) {
+                    si.stock_gain = selected.gain;
+                    if (selected.gain > 20) si.stock_risk_cat = 'Low Risk';
+                    else if (selected.gain >= 0) si.stock_risk_cat = 'Medium Risk';
+                    else si.stock_risk_cat = 'High Risk';
+                }
                 drawBoxplotChart(si, name);
                 const riskLabel = si.stock_risk_cat ? ` — falls in: ${si.stock_risk_cat}` : '';
                 document.getElementById('boxplot-title').innerText = name + ' — Gain Distribution';
-                document.getElementById('boxplot-subtitle').innerText = `Star (★) = ${name}'s actual gain${riskLabel}`;
+                document.getElementById('boxplot-subtitle').innerText = `Star (★) = ${name}'s gain${riskLabel}`;
 
                 console.log("All charts updated for:", name);
             } catch (err) {
