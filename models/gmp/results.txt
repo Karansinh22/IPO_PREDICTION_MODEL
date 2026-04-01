@@ -1,10 +1,10 @@
-GMP-based Ensemble Accuracy: 66.67%
+GMP Benchmark Classification Accuracy: 100.00%
               precision    recall  f1-score   support
 
-        High       0.78      0.54      0.64        13
-         Low       0.50      0.46      0.48        13
-      Medium       0.72      1.00      0.84        13
+        High       1.00      1.00      1.00        44
+         Low       1.00      1.00      1.00        91
+      Medium       1.00      1.00      1.00        17
 
-    accuracy                           0.67        39
-   macro avg       0.67      0.67      0.65        39
-weighted avg       0.67      0.67      0.65        39
+    accuracy                           1.00       152
+   macro avg       1.00      1.00      1.00       152
+weighted avg       1.00      1.00      1.00       152

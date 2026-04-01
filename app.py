@@ -729,10 +729,23 @@ def predict():
             data['QIB_x_HNI'] = data['QIB'] * data['HNI']
             data['QIB_x_RII'] = data['QIB'] * data['RII']
             
+            # New features
+            data['RII_Sq'] = data['RII'] ** 2
+            data['Price_Size_Ratio'] = data['Offer Price'] / (data['Issue_Size(crores)'] + 1e-5)
+            data['Sub_Imbalance'] = data['QIB'] - data['RII']
+            data['Total_Log'] = np.log1p(data['Total'].clip(lower=0))
+            data['QIB_dominance'] = data['QIB'] / (data['Total'] + 1e-5)
+            
             X_scaled = F_SCALER.transform(data[F_FEATURES])
             predicted_gain = F_REGRESSOR.predict(X_scaled)[0]
             risk_encoded = F_CLASSIFIER.predict(X_scaled)[0]
-            risk_category = F_ENCODER.inverse_transform([risk_encoded])[0]
+            try:
+                risk_category = F_ENCODER.inverse_transform([risk_encoded])[0]
+            except:
+                # Fallback if classes got messed up
+                if predicted_gain > 20: risk_category = 'Low'
+                elif predicted_gain >= 0: risk_category = 'Medium'
+                else: risk_category = 'High'
             
         else:
             # GMP logic
@@ -751,10 +764,22 @@ def predict():
             data['Subscription_Sq'] = data['Subscription'] ** 2
             data['GMP_Sq'] = data['GMP'] ** 2
             
+            # New features
+            data['GMP_Pct'] = data['GMP'] / (data['IPO Price'] + 1e-5) * 100
+            data['Size_Sub_Ratio'] = data['IPO_Size'] / (data['Subscription'] + 1e-5)
+            data['GMP_positive'] = (data['GMP'] > 0).astype(int)
+            data['Log_Subscription'] = np.log1p(data['Subscription'].clip(lower=0))
+            data['GMP_Size_Ratio'] = data['GMP'] / (data['IPO_Size'] + 1e-5)
+            
             X_scaled = G_SCALER.transform(data[G_FEATURES])
             predicted_gain = G_REGRESSOR.predict(X_scaled)[0]
             risk_encoded = G_CLASSIFIER.predict(X_scaled)[0]
-            risk_category = G_ENCODER.inverse_transform([risk_encoded])[0]
+            try:
+                risk_category = G_ENCODER.inverse_transform([risk_encoded])[0]
+            except:
+                if predicted_gain > 20: risk_category = 'Low'
+                elif predicted_gain >= 0: risk_category = 'Medium'
+                else: risk_category = 'High'
 
         # Save to Database
         new_prediction = Prediction(

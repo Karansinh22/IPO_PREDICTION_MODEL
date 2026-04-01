@@ -1,0 +1,16 @@
+import joblib, os
+BASE = r'd:\Desktop shortcuts\college\sem 6\MINI PROJECT\GITHUB\IPO_PREDICTION_MODEL'
+print("FUND_FEAT:", joblib.load(os.path.join(BASE, 'models/fundamental_features.pkl')))
+print("GMP_FEAT:", joblib.load(os.path.join(BASE, 'models/gmp/features.pkl')))
+f_reg = joblib.load(os.path.join(BASE, 'models/fundamental_regressor.pkl'))
+f_cls = joblib.load(os.path.join(BASE, 'models/fundamental_classifier.pkl'))
+g_reg = joblib.load(os.path.join(BASE, 'models/gmp/regressor.pkl'))
+g_cls = joblib.load(os.path.join(BASE, 'models/gmp/classifier.pkl'))
+print("F_REG:", type(f_reg).__name__)
+print("F_CLS:", type(f_cls).__name__)
+print("G_REG:", type(g_reg).__name__)
+print("G_CLS:", type(g_cls).__name__)
+f_enc = joblib.load(os.path.join(BASE, 'models/fundamental_label_encoder.pkl'))
+g_enc = joblib.load(os.path.join(BASE, 'models/gmp/label_encoder.pkl'))
+print("F_ENC:", list(f_enc.classes_))
+print("G_ENC:", list(g_enc.classes_))
