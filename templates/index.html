@@ -1074,7 +1074,7 @@
                     <div class="risk-badge risk-{{ risk_category }}">{{ risk_text }}</div>
 
                     {% if latest_prediction_id %}
-                    <a href="/download_report/{{ latest_prediction_id }}" class="download-btn"
+                    <a href="{{ url_for('download_report', prediction_id=latest_prediction_id) }}" class="download-btn"
                         style="display: block; width: 100%; text-align: center; margin-top: 15px; padding: 12px; background: var(--primary-gradient); color: white; border-radius: 12px; text-decoration: none; font-weight: 600; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px;">
                         📥 Download Detailed Intel Report (PDF)
                     </a>
@@ -1114,7 +1114,7 @@
                         <div style="margin-top: 8px; font-size: 0.95rem;">
                             Expected: <strong style="color: var(--money-green)">{{ item.gain }}</strong> |
                             Risk: <span class="risk-{{ item.risk }}">{{ item.risk }}</span>
-                            <a href="/download_report/{{ item.id }}"
+                            <a href="{{ url_for('download_report', prediction_id=item.id) }}"
                                 style="margin-left: 10px; color: var(--money-green); text-decoration: none; font-size: 0.8rem; border: 1px solid var(--money-green); padding: 2px 8px; border-radius: 4px;">PDF</a>
                         </div>
                         <div class="history-details">
