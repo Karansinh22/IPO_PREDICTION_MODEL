@@ -1721,47 +1721,53 @@
                 // --- Chart 1: Trend - highlight stock's year with a dot ---
                 if (charts.trend.data.datasets.length > 1) charts.trend.data.datasets.splice(1);
                 const yearIdx = charts.trend.data.labels.indexOf(selected.year ? selected.year.toString() : '');
-                // Add a horizontal reference line at the stock's gain level
                 const numYears = charts.trend.data.labels.length;
-                charts.trend.data.datasets.push({
-                    label: name + ' Gain',
-                    data: new Array(numYears).fill(selected.gain),
-                    borderColor: 'rgba(102,126,234,0.6)',
-                    backgroundColor: 'transparent',
-                    borderDash: [6, 4],
-                    fill: false,
-                    tension: 0,
-                    pointRadius: 0
-                });
-                if (yearIdx !== -1) {
-                    const hl = new Array(numYears).fill(null);
-                    hl[yearIdx] = selected.gain;
+                
+                if (selected.gain !== null && selected.gain !== undefined) {
                     charts.trend.data.datasets.push({
-                        label: name + ' (Year)',
-                        data: hl,
-                        pointRadius: 9,
-                        pointStyle: 'star',
-                        backgroundColor: '#667eea',
-                        borderColor: '#fff',
-                        borderWidth: 2,
-                        showLine: false
+                        label: name + ' Gain',
+                        data: new Array(numYears).fill(selected.gain),
+                        borderColor: 'rgba(102,126,234,0.6)',
+                        backgroundColor: 'transparent',
+                        borderDash: [6, 4],
+                        fill: false,
+                        tension: 0,
+                        pointRadius: 0
                     });
+                    if (yearIdx !== -1) {
+                        const hl = new Array(numYears).fill(null);
+                        hl[yearIdx] = selected.gain;
+                        charts.trend.data.datasets.push({
+                            label: name + ' (Year)',
+                            data: hl,
+                            pointRadius: 9,
+                            pointStyle: 'star',
+                            backgroundColor: '#667eea',
+                            borderColor: '#fff',
+                            borderWidth: 2,
+                            showLine: false
+                        });
+                    }
+                    document.getElementById('trend-title').innerText = name + ' vs Market Trend';
+                    document.getElementById('trend-subtitle').innerText = `Dashed line = ${selected.gain.toFixed(1)}% gain | Star = listing year`;
+                } else {
+                    document.getElementById('trend-title').innerText = name + ' vs Market Trend';
+                    document.getElementById('trend-subtitle').innerText = `Historical gain not available. Market trend shown.`;
                 }
-                document.getElementById('trend-title').innerText = name + ' vs Market Trend';
-                document.getElementById('trend-subtitle').innerText = `Dashed line = ${selected.gain !== null ? selected.gain.toFixed(1) + '% gain' : 'N/A'} | Star = listing year`;
                 charts.trend.update();
 
                 // --- Chart 2: Benchmark - highlight selected stock's metrics ---
                 if (charts.benchmark.data.datasets.length > 1) charts.benchmark.data.datasets.splice(1);
                 charts.benchmark.data.datasets.push({
                     label: name,
-                    data: [selected.gain, selected.total, selected.issue_size / 100],
+                    data: [selected.gain !== null ? selected.gain : 0, selected.total || 0, (selected.issue_size || 0) / 100],
                     backgroundColor: 'rgba(34, 197, 94, 0.8)',
                     borderColor: '#22c55e',
                     borderWidth: 1
                 });
                 document.getElementById('benchmark-title').innerText = name + ' vs Market';
-                document.getElementById('benchmark-subtitle').innerText = 'Green bars = selected IPO | Purple = market average';
+                const benchSub = selected.gain !== null ? 'Green bars = selected IPO | Purple = market average' : 'Gain bar artificially 0 (awaiting prediction) | Purple = market avg';
+                document.getElementById('benchmark-subtitle').innerText = benchSub;
                 charts.benchmark.update();
 
                 // --- Charts 3 & 4: Fetch stock-specific insights ---
@@ -1816,15 +1822,23 @@
 
                 // --- Chart 4: Boxplot - redraw with stock marker ---
                 if (si.stock_gain === null || si.stock_gain === undefined) {
-                    si.stock_gain = selected.gain;
-                    if (selected.gain > 20) si.stock_risk_cat = 'Low Risk';
-                    else if (selected.gain >= 0) si.stock_risk_cat = 'Medium Risk';
-                    else si.stock_risk_cat = 'High Risk';
+                    if (selected.gain !== null && selected.gain !== undefined) {
+                        si.stock_gain = selected.gain;
+                        if (selected.gain > 20) si.stock_risk_cat = 'Low Risk';
+                        else if (selected.gain >= 0) si.stock_risk_cat = 'Medium Risk';
+                        else si.stock_risk_cat = 'High Risk';
+                    }
                 }
                 drawBoxplotChart(si, name);
-                const riskLabel = si.stock_risk_cat ? ` — falls in: ${si.stock_risk_cat}` : '';
-                document.getElementById('boxplot-title').innerText = name + ' — Gain Distribution';
-                document.getElementById('boxplot-subtitle').innerText = `Star (★) = ${name}'s gain${riskLabel}`;
+                
+                if (si.stock_gain !== null && si.stock_gain !== undefined) {
+                    const riskLabel = si.stock_risk_cat ? ` — falls in: ${si.stock_risk_cat}` : '';
+                    document.getElementById('boxplot-title').innerText = name + ' — Gain Distribution';
+                    document.getElementById('boxplot-subtitle').innerText = `Star (★) = ${name}'s gain${riskLabel}`;
+                } else {
+                    document.getElementById('boxplot-title').innerText = name + ' — Gain Distribution';
+                    document.getElementById('boxplot-subtitle').innerText = `Awaiting prediction to view gain distribution.`;
+                }
 
                 console.log("All charts updated for:", name);
             } catch (err) {
