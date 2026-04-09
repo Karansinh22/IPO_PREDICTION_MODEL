@@ -392,6 +392,11 @@
             color: var(--high-risk);
         }
 
+        .status-upcoming {
+            background: rgba(251, 191, 36, 0.2);
+            color: #fbbf24;
+        }
+
         .comparison-badge {
             display: block;
             margin-top: 15px;
@@ -1372,12 +1377,13 @@
                     `;
                     item.onclick = () => selectIPO(JSON.parse(item.dataset.ipo));
                 } else {
-                    const statusClass = ipo.status === 'Open' ? 'status-open' : 'status-closed';
+                    const statusClass = ipo.status === 'Open' ? 'status-open' : (ipo.status === 'Upcoming' ? 'status-upcoming' : 'status-closed');
                     item.innerHTML = `
                         <strong>${ipo.name}</strong>
                         <span class="status-badge ${statusClass}">${ipo.status}</span>
+                        ${ipo.category === 'SME' ? '<span style="font-size:0.65rem;background:#7c3aed;color:white;padding:1px 6px;border-radius:4px;margin-left:4px">SME</span>' : ''}
                         <br>
-                        <small style="opacity: 0.6">Price: ₹${ipo.offer_price} | Sub: ${ipo.total}x | GMP: ₹${ipo.gmp || 0}</small>
+                        <small style="opacity: 0.6">Price: ₹${ipo.offer_price || 'TBA'} | Sub: ${ipo.total || 0}x | GMP: ₹${ipo.gmp || 0} (${ipo.gmp_pct || 0}%)</small>
                     `;
                     item.onclick = () => selectMarketIPO(JSON.parse(item.dataset.ipo));
                 }
