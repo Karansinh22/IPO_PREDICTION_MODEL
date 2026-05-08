@@ -1,0 +1,63 @@
+﻿SUB KEYS (first 15):
+  [Om Power Transmission IPO] -> QIB=0.51 RII=0.21
+  [Emiac Technologies BSE SME] -> QIB=1.02 RII=3.74
+  [Safety Controls BSE SME] -> QIB=1.31 RII=0.76
+  [Vivid Electromech NSE SME] -> QIB=1.95 RII=0.36
+  [Sai Parenteral's IPO] -> QIB=1.73 RII=0.12
+  [Highness Microelectronics BSE SME] -> QIB=81.95 RII=185.11
+  [Amir Chand Jagdish Kumar IPO] -> QIB=1.18 RII=1.44
+  [Powerica IPO] -> QIB=4.74 RII=0.16
+  [Tipco Engineering BSE SME] -> QIB=3.2 RII=0.66
+  [Central Mine Planning IPO] -> QIB=3.48 RII=0.35
+  [Speciality Medicines BSE SME] -> QIB=96.24 RII=0.85
+  [Novus Loyalty BSE SME] -> QIB=1.38 RII=1.82
+  [GSP Crop Science IPO] -> QIB=2.66 RII=0.42
+  [Innovision IPO] -> QIB=14.3 RII=0.6
+  [Apsis Aerocom NSE SME] -> QIB=99.96 RII=100.24
+
+GMP KEYS (first 15):
+  [Citius Transnet InvIT IPO]
+  [Propshare Celestia IPO]
+  [Om Power Transmission IPO]
+  [Emiac Technologies BSE SME]
+  [Safety Controls BSE SME]
+  [Vivid Electromech NSE SME]
+  [Sai Parenteral's IPO]
+  [Highness Microelectronics BSE SME]
+  [Amir Chand Jagdish Kumar IPO]
+  [Powerica IPO]
+  [Tipco Engineering BSE SME]
+  [Central Mine Planning IPO]
+  [Speciality Medicines BSE SME]
+  [Novus Loyalty BSE SME]
+  [GSP Crop Science IPO]
+
+OVERLAP CHECK:
+  MATCH: [Om Power Transmission IPO]
+  MATCH: [Emiac Technologies BSE SME]
+  MATCH: [Safety Controls BSE SME]
+  MATCH: [Vivid Electromech NSE SME]
+  MATCH: [Sai Parenteral's IPO]
+  MATCH: [Highness Microelectronics BSE SME]
+  MATCH: [Amir Chand Jagdish Kumar IPO]
+  MATCH: [Powerica IPO]
+  MATCH: [Tipco Engineering BSE SME]
+  MATCH: [Central Mine Planning IPO]
+  MATCH: [Speciality Medicines BSE SME]
+  MATCH: [Novus Loyalty BSE SME]
+  MATCH: [GSP Crop Science IPO]
+  MATCH: [Innovision IPO]
+  MATCH: [Apsis Aerocom NSE SME]
+  MATCH: [Raajmarg Infra Investment Trust IPO]
+  MATCH: [Rajputana Stainless IPO]
+  MATCH: [Srinibas Pradhan Constructions NSE SME]
+  MATCH: [Elfin Agro India BSE SME]
+  MATCH: [SEDEMAC Mechatronics IPO]
+  MATCH: [Acetech E-Commerce NSE SME]
+  MATCH: [Striders Impex NSE SME]
+  MATCH: [Omnitech Engineering IPO]
+  MATCH: [Yaap Digital NSE SME]
+  MATCH: [PNGS Reva Diamond Jewellery IPO]
+  MATCH: [Accord Transformer & Switchgear BSE SME]
+  MATCH: [Kiaasa Retail BSE SME]
+  MATCH: [Shree Ram Twistex IPO]

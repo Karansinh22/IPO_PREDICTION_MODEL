@@ -12,6 +12,7 @@ import re
 import logging
 import time
 import os
+import html
 import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
@@ -44,6 +45,8 @@ def _strip_html(text):
 
 def _num(text, default=0):
     """Extract first float from any string."""
+    if not text: return default
+    text = html.unescape(str(text))
     clean = re.sub(r'[^\d.\-]', '', _strip_html(str(text)))
     # remove trailing dots
     clean = clean.rstrip('.')
@@ -131,7 +134,7 @@ def _parse_gmp_rows(rows):
             'qib':          0,
             'hni':          0,
             'rii':          0,
-            'size':         _num(row.get('IPO Size (₹ in cr)', 0)),
+            'size':         _num(row.get('IPO Size', row.get('IPO Size (₹ in cr)', 0))),
             'open_date':    row.get('Open', ''),
             'close_date':   row.get('Close', ''),
             'listing_date': row.get('Listing', ''),
@@ -244,14 +247,28 @@ def _build_combined():
     gmp_dict  = _parse_gmp_rows(gmp_rows)   # key = full IPO name
     sub_dict  = _parse_sub_rows(sub_rows)   # key = full IPO name
 
+    gmp_lower_map = {k.lower(): k for k in gmp_dict.keys()}
+
     # Merge subscription data into GMP dict
     for name, sdata in sub_dict.items():
-        if name in gmp_dict:
-            gmp_dict[name].update({
+        name_lower = name.lower()
+        clean_name_lower = _clean_name(name).lower()
+
+        matched_name = None
+        if name_lower in gmp_lower_map:
+            matched_name = gmp_lower_map[name_lower]
+        else:
+            for gmp_name in gmp_dict.keys():
+                if _clean_name(gmp_name).lower() == clean_name_lower:
+                    matched_name = gmp_name
+                    break
+
+        if matched_name:
+            gmp_dict[matched_name].update({
                 'qib':   sdata['qib'],
                 'hni':   sdata['hni'],
                 'rii':   sdata['rii'],
-                'total': sdata['total'] if sdata['total'] > 0 else gmp_dict[name]['total'],
+                'total': sdata['total'] if sdata['total'] > 0 else gmp_dict[matched_name]['total'],
             })
         else:
             # Subscription API may have IPOs not in GMP API (very recent closed)

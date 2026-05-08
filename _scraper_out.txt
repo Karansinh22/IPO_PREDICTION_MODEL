@@ -1,0 +1,40 @@
+﻿python : 
+INFO:__main__:Loaded 267 
+historical IPOs from Excel 
+(last 5 years)
+At line:1 char:1
++ python scraper.py 2>&1 | 
+Out-File _scraper_out.txt 
+-Encoding utf8 ; G ...
++ ~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo         
+     : NotSpecified: (INF  
+  O:__main__:L... (last    
+ 5 years):String) [], R    
+emoteException
+    + FullyQualifiedErrorI 
+   d : NativeCommandError
+ 
+INFO:__main__:Combined: 30 
+live + 267 historical = 
+297 total
+
+Total IPOs: 297
+Live:       30
+Historical: 267
+
+[Open    ] Om Power Transmission                    P= 175.0 QIB= 0.51 RII= 0.21 Sub= 0.26x  
+[Upcoming] Citius Transnet InvIT                    P=     0 QIB=    0 RII=    0 Sub=    0x  
+[Upcoming] Propshare Celestia                       P=     0 QIB=    0 RII=    0 Sub=    0x  
+[Closed  ] Emiac Technologies                       P=  98.0 QIB= 1.02 RII= 3.74 Sub= 3.22x  
+[Closed  ] Safety Controls                          P=  80.0 QIB= 1.31 RII= 0.76 Sub= 1.28x  
+[Closed  ] Vivid Electromech                        P= 555.0 QIB= 1.95 RII= 0.36 Sub= 1.06x  
+[Closed  ] Sai Parenteral's                         P= 392.0 QIB= 1.73 RII= 0.12 Sub= 1.08x  
+[Closed  ] Highness Microelectronics                P= 120.0 QIB=81.95 RII=185.11 Sub=193.91x  
+[Closed  ] Amir Chand Jagdish Kumar                 P= 212.0 QIB= 1.18 RII= 1.44 Sub= 3.41x  
+[Closed  ] Powerica                                 P= 395.0 QIB= 4.74 RII= 0.16 Sub= 1.53x  
+[Closed  ] Tipco Engineering                        P=  89.0 QIB=  3.2 RII= 0.66 Sub=  1.7x  
+[Closed  ] Central Mine Planning                    P= 172.0 QIB= 3.48 RII= 0.35 Sub= 1.05x  
+[Closed  ] Speciality Medicines                     P= 124.0 QIB=96.24 RII= 0.85 Sub= 2.27x  
+[Closed  ] Novus Loyalty                            P= 146.0 QIB= 1.38 RII= 1.82 Sub= 1.55x  
+[Closed  ] GSP Crop Science                         P= 320.0 QIB= 2.66 RII= 0.42 Sub= 1.64x  
