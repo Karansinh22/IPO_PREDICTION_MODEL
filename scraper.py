@@ -7,7 +7,17 @@ Sources:
 Results are merged and cached for 15 minutes.
 """
 
-import requests
+try:
+    import cloudscraper
+    _scraper = cloudscraper.create_scraper(
+        browser={'browser': 'chrome', 'platform': 'windows', 'mobile': False}
+    )
+except ImportError:
+    import requests as _req_fallback
+    class _FallbackScraper:
+        def get(self, url, headers=None, timeout=15):
+            return _req_fallback.get(url, headers=headers, timeout=timeout)
+    _scraper = _FallbackScraper()
 import re
 import logging
 import time
@@ -107,7 +117,7 @@ def _fetch_gmp_api():
     url  = (f'https://webnodejs.investorgain.com/cloud/new/report/'
             f'data-read/331/1/4/{year}/{fy}/0/all?search=&v=12-49')
     try:
-        r = requests.get(url, headers=HEADERS, timeout=15)
+        r = _scraper.get(url, headers=HEADERS, timeout=15)
         r.raise_for_status()
         return r.json().get('reportTableData', [])
     except Exception as e:
@@ -155,7 +165,7 @@ def _fetch_sub_api():
     url  = (f'https://webnodejs.investorgain.com/cloud/new/report/'
             f'data-read/333/1/4/{year}/{fy}/0/all?search=&v=12-49')
     try:
-        r = requests.get(url, headers=HEADERS, timeout=15)
+        r = _scraper.get(url, headers=HEADERS, timeout=15)
         r.raise_for_status()
         return r.json().get('reportTableData', [])
     except Exception as e:
