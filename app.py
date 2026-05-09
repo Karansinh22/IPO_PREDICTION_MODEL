@@ -9,11 +9,14 @@ import pandas as pd
 import numpy as np
 import os
 import uuid
+from datetime import datetime, timezone, timedelta
 from scraper import get_indian_market_ipos
 import json
 from fpdf import FPDF
 from matplotlib.figure import Figure
 import io
+
+IST = timezone(timedelta(hours=5, minutes=30))
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'ipo_predictor_very_secret_key_123')
@@ -787,7 +790,7 @@ def predict():
             ipo_name=request.form.get('ipo_name', 'Manual Entry') or 'Manual Entry',
             gain=f"{predicted_gain:.2f}%",
             risk=risk_category,
-            timestamp=pd.Timestamp.now().strftime('%Y-%m-%d %H:%M:%S'),
+            timestamp=datetime.now(IST).strftime('%Y-%m-%d %H:%M:%S IST'),
             model_type=model_type,
             inputs_json=json.dumps(raw_inputs)
         )
